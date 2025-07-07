@@ -5,6 +5,7 @@ import { CartItem as CartItemType } from '@/lib/types';
 import { Button } from './ui/button';
 import { Minus, Plus, Trash2 } from 'lucide-react';
 import { useCart } from '@/context/cart-context';
+import { motion } from 'framer-motion';
 
 interface CartItemProps {
   item: CartItemType;
@@ -14,29 +15,35 @@ export function CartItem({ item }: CartItemProps) {
   const { dispatch } = useCart();
 
   return (
-    <div className="flex items-start space-x-4 py-2">
-      <div className="relative h-16 w-16 rounded-md overflow-hidden">
+    <motion.div
+      layout
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, x: -20, transition: { duration: 0.2 } }}
+      className="flex items-start space-x-4 py-3"
+    >
+      <div className="relative h-20 w-20 rounded-lg overflow-hidden shadow-sm">
         <Image src={item.image} alt={item.name} fill className="object-cover" />
       </div>
-      <div className="flex-1">
-        <p className="font-semibold">{item.name}</p>
-        <p className="text-sm text-muted-foreground">{item.details}</p>
-        <p className="text-sm font-bold mt-1">{(item.price * item.quantity).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</p>
-      </div>
-      <div className="flex flex-col items-end space-y-2">
-         <div className="flex items-center">
-          <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => dispatch({ type: 'DECREMENT_QUANTITY', payload: { id: item.id } })}>
-            <Minus className="h-4 w-4" />
-          </Button>
-          <span className="w-8 text-center">{item.quantity}</span>
-          <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => dispatch({ type: 'INCREMENT_QUANTITY', payload: { id: item.id } })}>
-            <Plus className="h-4 w-4" />
-          </Button>
+      <div className="flex-1 flex flex-col h-20">
+        <p className="font-semibold text-gray-800">{item.name}</p>
+        <p className="text-xs text-gray-500 flex-1">{item.details}</p>
+        <div className="flex items-center justify-between mt-1">
+          <div className="flex items-center">
+            <Button variant="outline" size="icon" className="h-7 w-7 rounded-full" onClick={() => dispatch({ type: 'DECREMENT_QUANTITY', payload: { id: item.id } })}>
+              <Minus className="h-4 w-4" />
+            </Button>
+            <span className="w-8 text-center font-medium">{item.quantity}</span>
+            <Button variant="outline" size="icon" className="h-7 w-7 rounded-full" onClick={() => dispatch({ type: 'INCREMENT_QUANTITY', payload: { id: item.id } })}>
+              <Plus className="h-4 w-4" />
+            </Button>
+          </div>
+          <p className="text-base font-bold text-gray-900">{(item.price * item.quantity).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</p>
         </div>
-        <Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground hover:text-destructive" onClick={() => dispatch({ type: 'REMOVE_ITEM', payload: { id: item.id } })}>
-          <Trash2 className="h-4 w-4" />
-        </Button>
       </div>
-    </div>
+      <Button variant="ghost" size="icon" className="h-7 w-7 text-gray-400 hover:text-destructive hover:bg-destructive/10 shrink-0" onClick={() => dispatch({ type: 'REMOVE_ITEM', payload: { id: item.id } })}>
+        <Trash2 className="h-4 w-4" />
+      </Button>
+    </motion.div>
   );
 }

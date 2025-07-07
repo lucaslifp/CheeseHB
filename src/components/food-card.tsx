@@ -1,67 +1,78 @@
 "use client";
 
-import Image from 'next/image';
-import { Product } from '@/lib/types';
-import { Button } from './ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from './ui/card';
-import { useState } from 'react';
-import { CustomizationModal } from './customization-modal';
-import { useCart } from '@/context/cart-context';
+import { Product } from "@/lib/types";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
+import Image from "next/image";
+import { Button } from "./ui/button";
+import { Plus } from "lucide-react";
+import { motion } from "framer-motion";
 
 interface FoodCardProps {
   product: Product;
+  onProductClick: (product: Product) => void;
 }
 
-export function FoodCard({ product }: FoodCardProps) {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const { addItem } = useCart();
-  
-  const isCustomizable = product.flavors || product.extras;
+export function FoodCard({ product, onProductClick }: FoodCardProps) {
 
-  const handleAddClick = () => {
-    if (isCustomizable) {
-      setIsModalOpen(true);
-    } else {
-      addItem({
-        id: product.id,
-        productId: product.id,
-        name: product.name,
-        quantity: 1,
-        price: product.price,
-        image: product.image,
-        details: product.name,
-      });
+  const renderActionButton = () => {
+    if (product.category === "Pizzas" || product.category === "Lanches") {
+      return (
+        <Button
+          onClick={() => onProductClick(product)}
+          className="w-full bg-primary hover:bg-primary/90 text-primary-foreground transition-colors"
+        >
+          {product.category === "Pizzas" ? "Monte sua Pizza" : "Monte o seu"}
+        </Button>
+      );
     }
+    return (
+      <Button
+        onClick={() => onProductClick(product)}
+        className="w-full bg-primary hover:bg-primary/90 text-primary-foreground transition-colors"
+      >
+        Adicionar
+        <Plus className="ml-2 h-4 w-4" />
+      </Button>
+    );
   };
 
   return (
-    <>
-      <Card className="flex flex-col overflow-hidden border-2 border-transparent hover:border-accent transition-all duration-300 ease-in-out transform hover:scale-105 shadow-lg rounded-lg">
+    <motion.div
+      layout
+      whileHover={{ y: -5, scale: 1.05 }}
+      transition={{ type: 'spring', stiffness: 300, damping: 15 }}
+    >
+      <Card className="flex flex-col overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300 ease-in-out h-full border">
         <CardHeader className="p-0">
           <div className="aspect-video relative">
-            <Image src={product.image} alt={product.name} fill className="object-cover" data-ai-hint={product['data-ai-hint']} />
+            <Image
+              src={product.image}
+              alt={product.name}
+              fill
+              className="object-cover"
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+              data-ai-hint={product['data-ai-hint']}
+            />
           </div>
         </CardHeader>
-        <CardContent className="flex-1 flex flex-col p-4">
-          <CardTitle className="text-lg font-semibold font-headline">{product.name}</CardTitle>
-          <CardDescription className="mt-1 text-sm text-muted-foreground flex-1">{product.description}</CardDescription>
-          <p className="mt-4 text-xl font-bold text-foreground">
-            {product.price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-          </p>
+        <CardContent className="flex-1 flex flex-col p-4 bg-white">
+          <CardTitle className="text-lg font-bold mb-1 text-gray-900">{product.name}</CardTitle>
+          <CardDescription className="text-sm text-gray-600 mb-4 flex-grow">
+            {product.description}
+          </CardDescription>
+          <div className="flex justify-between items-center mt-auto">
+            <span className="text-xl font-bold text-primary">
+              {product.price.toLocaleString("pt-BR", {
+                style: "currency",
+                currency: "BRL",
+              })}
+            </span>
+            <div className="w-32">
+              {renderActionButton()}
+            </div>
+          </div>
         </CardContent>
-        <CardFooter className="p-4 pt-0">
-          <Button className="w-full bg-primary hover:bg-primary/90" onClick={handleAddClick}>
-            {isCustomizable ? 'Montar' : 'Adicionar'}
-          </Button>
-        </CardFooter>
       </Card>
-      {isCustomizable && (
-        <CustomizationModal
-          isOpen={isModalOpen}
-          onClose={() => setIsModalOpen(false)}
-          product={product}
-        />
-      )}
-    </>
+    </motion.div>
   );
 }

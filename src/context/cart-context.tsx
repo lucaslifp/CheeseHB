@@ -1,7 +1,7 @@
 "use client";
 
 import React, { createContext, useReducer, useContext, ReactNode } from 'react';
-import { CartItem } from '@/lib/types';
+import type { CartItem } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 
 type CartState = {
@@ -24,11 +24,13 @@ const cartReducer = (state: CartState, action: CartAction): CartState => {
     case 'ADD_ITEM': {
       const existingItemIndex = state.items.findIndex(item => item.id === action.payload.id);
       if (existingItemIndex > -1) {
+        // If a fully identical customized item exists, increment its quantity
         const updatedItems = [...state.items];
         updatedItems[existingItemIndex].quantity += action.payload.quantity;
         return { ...state, items: updatedItems };
       }
-      return { ...state, items: [...state.items, action.payload] };
+      // Otherwise, add as a new item
+      return { ...state, items: [action.payload, ...state.items] };
     }
     case 'REMOVE_ITEM':
       return {
@@ -44,7 +46,7 @@ const cartReducer = (state: CartState, action: CartAction): CartState => {
     case 'DECREMENT_QUANTITY': {
       const updatedItems = state.items
         .map(item =>
-          item.id === action.payload.id ? { ...item, quantity: item.quantity - 1 } : item
+          item.id === action.payload.id ? { ...item, quantity: Math.max(0, item.quantity - 1) } : item
         )
         .filter(item => item.quantity > 0);
       return { ...state, items: updatedItems };
@@ -74,9 +76,10 @@ export const useCart = () => {
     context.dispatch({ type: 'ADD_ITEM', payload: item });
     toast({
       title: "Adicionado ao Carrinho!",
-      description: `${item.name} foi adicionado.`,
+      description: `${item.name} foi adicionado com sucesso.`,
+      duration: 3000,
     })
   }
   
-  return { ...context, addItem };
+  return { state: context.state, dispatch: context.dispatch, addItem };
 };
