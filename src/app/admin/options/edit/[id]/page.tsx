@@ -1,22 +1,25 @@
-"use client"
-
+import { OptionGroupForm } from "@/components/admin/option-group-form";
+import { allOptionGroups } from "@/lib/data";
+import type { OptionGroup } from "@/lib/types";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
-import { OptionGroupForm } from "@/components/admin/option-group-form"
-import { allOptionGroups } from "@/lib/data"
-import type { OptionGroup } from "@/lib/types"
+} from "@/components/ui/card";
 
-export default function EditOptionGroupPage({ params }: { params: { id: string } }) {
-  // In a real app, you would fetch this from your database
-  const group = allOptionGroups.find((g) => g.id === params.id) as OptionGroup | undefined
+interface PageProps {
+  params: { id: string };
+}
+
+export default async function EditOptionGroupPage({ params }: PageProps) {
+  const group = allOptionGroups.find((g) => g.id === params.id) as
+    | OptionGroup
+    | undefined;
 
   if (!group) {
-    return <div>Grupo de opções não encontrado</div>
+    return <div>Grupo de opções não encontrado</div>;
   }
 
   return (
@@ -31,5 +34,5 @@ export default function EditOptionGroupPage({ params }: { params: { id: string }
         <OptionGroupForm initialData={group} />
       </CardContent>
     </Card>
-  )
+  );
 }
